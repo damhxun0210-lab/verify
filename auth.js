@@ -404,11 +404,20 @@
       }
 
       // ✅ /수동인증
-      if (interaction.isCommand() && interaction.commandName === "수동인증") {
-        if (!interaction.member.permissions.has(PermissionsBitField.Flags.KickMembers)) {
-          return interaction.reply({ content: "⚠️ 관리자 권한이 없습니다.", ephemeral: true });
-        }
+if (interaction.isCommand() && interaction.commandName === "수동인증") {
+  const ALLOWED_ROLE_ID = "1437445346002473094";
 
+  // 권한 검사: KickMembers 권한 OR 특정 역할을 가진 경우
+  if (
+    !interaction.member.permissions.has(PermissionsBitField.Flags.KickMembers) &&
+    !interaction.member.roles.cache.has(ALLOWED_ROLE_ID)
+  ) {
+    return interaction.reply({
+      content: "⚠️ 관리자 권한이 없습니다.",
+      ephemeral: true
+    });
+  }
+  
         const target = interaction.options.getUser("대상");
         const robloxIdInput = interaction.options.getString("robloxid");
 
