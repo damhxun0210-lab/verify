@@ -77,50 +77,83 @@ export async function setupTicket(client) {
     }
 
     if (interaction.isModalSubmit() && interaction.customId === "ticket_modal") {
-      await interaction.reply({ content: "*⏳ 티켓생성중...*", ephemeral: true });
+  // 제출 즉시 응답 — 사용자에게 “티켓생성중…” 표시
+  await interaction.reply({ content: "*⏳ 티켓생성중…*", ephemeral: true });
 
-      // 3초 대기 후 생성
-      setTimeout(async () => {
-        const discordName = interaction.fields.getTextInputValue("discord_name");
-        const robloxName = interaction.fields.getTextInputValue("roblox_name");
-        const prankConfirm = interaction.fields.getTextInputValue("confirmation");
+  try {
+    const discordName = interaction.fields.getTextInputValue("discord_name");
+    const robloxName  = interaction.fields.getTextInputValue("roblox_name");
+    const prankConfirm = interaction.fields.getTextInputValue("confirmation");
 
-        const ticketName = `수동인증요청-${interaction.user.username}-${ticketCounter++}`;
-
-        const ticketChannel = await interaction.guild.channels.create({
-  name: ticketName,
-  type: 0,
-  parent: TICKET_CATEGORY_ID,
-  permissionOverwrites: [
-    {
-      id: interaction.guild.id, // 전체 일반인 차단
-      deny: [PermissionsBitField.Flags.ViewChannel],
-    },
-    {
-      id: interaction.user.id, // 티켓 작성자 허용
-      allow: [
-        PermissionsBitField.Flags.ViewChannel,
-        PermissionsBitField.Flags.SendMessages,
-        PermissionsBitField.Flags.AttachFiles,
-        PermissionsBitField.Flags.EmbedLinks,
+    const ticketName = `수동인증요청‑${interaction.user.username}‑${ticketCounter++}`;
+    const ticketChannel = await interaction.guild.channels.create({
+      name: ticketName,
+      type: 0,
+      parent: TICKET_CATEGORY_ID,
+      permissionOverwrites: [
+        {
+          id: interaction.guild.id,
+          deny: [PermissionsBitField.Flags.ViewChannel],
+        },
+        {
+          id: interaction.user.id,
+          allow: [
+            PermissionsBitField.Flags.ViewChannel,
+            PermissionsBitField.Flags.SendMessages,
+            PermissionsBitField.Flags.AttachFiles,
+            PermissionsBitField.Flags.EmbedLinks,
+          ],
+        },
+        {
+          id: "1427689762902511616",
+          allow: [
+            PermissionsBitField.Flags.ViewChannel,
+            PermissionsBitField.Flags.SendMessages,
+            PermissionsBitField.Flags.AttachFiles,
+            PermissionsBitField.Flags.EmbedLinks,
+          ],
+        },
       ],
-    },
-    {
-      id: "1427689762902511616", // 추가된 역할 권한
-      allow: [
-        PermissionsBitField.Flags.ViewChannel,
-        PermissionsBitField.Flags.SendMessages,
-        PermissionsBitField.Flags.AttachFiles,
-        PermissionsBitField.Flags.EmbedLinks,
-      ],
-    },
-  ],
-});
+    });
 
-        // 티켓 생성 완료 메시지
-        await interaction.editReply({
-          content: `*${interaction.user}님 '수동인증요청' 티켓이 생성되었습니다. <#${ticketChannel.id}> 로 이동하세요.*`,
-        });
+    // 임베드 + 닫기 버튼 생성
+    const ticketEmbed = new EmbedBuilder()
+      .setColor("#2a5034")
+      .setTitle("수동인증요청")
+      .addFields(
+        { name: "요청자", value: `${interaction.user.tag}` },
+        { name: "디스코드", value: discordName },
+        { name: "로블록스", value: robloxName },
+        { name: "장난으로 티켓을 열지 않겠습니다.", value: prankConfirm }
+      );
+
+    const closeRow = new ActionRowBuilder().addComponents(
+      new ButtonBuilder()
+        .setCustomId("close_ticket")
+        .setLabel("📩 티켓닫기")
+        .setStyle(ButtonStyle.Danger)
+    );
+
+    await ticketChannel.send({ embeds: [ticketEmbed], components: [closeRow] });
+
+    // 생성 완료 메시지로 수정
+    await interaction.editReply({
+      content: `*${interaction.user}님 '수동인증요청' 티켓이 생성되었습니다. <#${ticketChannel.id}> 로 이동하세요.*`,
+      ephemeral: true,
+    });
+
+  } catch (error) {
+    console.error("티켓 생성 중 오류:", error);
+    // 에러 시 응답 수정
+    await interaction.editReply({
+      content: "티켓 생성 중 오류가 발생했습니다. 다시 시도해 주세요.",
+      ephemeral: true,
+    });
+  }
+
+  return;
+}
+
 
         // 티켓 채널 임베드
         const ticketEmbed = new EmbedBuilder()
