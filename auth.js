@@ -403,7 +403,7 @@
         }
       }
 
-      // ✅ /수동인증
+            // ✅ /수동인증
       if (interaction.isCommand() && interaction.commandName === "수동인증") {
         if (!interaction.member.permissions.has(PermissionsBitField.Flags.KickMembers)) {
           return interaction.reply({ content: "⚠️ 관리자 권한이 없습니다.", ephemeral: true });
@@ -416,26 +416,33 @@
         let robloxData = null;
         try {
           const res = await fetch(`https://users.roblox.com/v1/users/${robloxIdInput}`);
-          if (res.ok) robloxData = await res.json();
-          else {
+          if (res.ok) {
+            robloxData = await res.json();
+          } else {
             const alt = await fetch("https://users.roblox.com/v1/usernames/users", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ usernames: [robloxIdInput] }),
             });
             const altData = await alt.json();
-            if (altData.data?.length) robloxData = altData.data[0];
+            if (altData.data?.length) {
+              robloxData = altData.data[0];
+            }
           }
         } catch (e) {
           return interaction.reply({ embeds: [errorEmbed("40401")], ephemeral: true });
         }
 
-        if (!robloxData) return interaction.reply({ embeds: [errorEmbed("40401")], ephemeral: true });
+        if (!robloxData) {
+          return interaction.reply({ embeds: [errorEmbed("40401")], ephemeral: true });
+        }
 
         await setUserAuth(target.id, robloxData.id, robloxData.name, null, true);
 
         const member = await interaction.guild.members.fetch(target.id);
-        for (const r of VERIFIED_ROLES) await member.roles.add(r).catch(() => {});
+        for (const r of VERIFIED_ROLES) {
+          await member.roles.add(r).catch(() => {});
+        }
 
         const embedDone = new EmbedBuilder()
           .setColor("#5661EA")
@@ -443,7 +450,7 @@
           .setDescription(`<@${target.id}>님, 로블록스 **${robloxData.name}** 계정으로 인증이 완료되었습니다.`)
           .setFooter({ text: `ROKA Verify • ${getKSTTime()}` });
 
-        return interaction.reply({ embeds: [embedDone] }); // 반드시 return
+        return interaction.reply({ embeds: [embedDone] });
       }
     } catch (err) {
       console.error("❌ 인증 오류:", err);
