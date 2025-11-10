@@ -119,7 +119,7 @@ export async function setupTicket(client) {
 
         // 티켓 생성 완료 메시지
         await interaction.editReply({
-          content: `*${interaction.user}님 '수동인증요청' 티켓이 생성되었습니다. <#${ticketChannel.id}> 로 이동하세요.*`,
+          content: `*${interaction.user}님 ***수동인증요청*** 티켓이 생성되었습니다. <#${ticketChannel.id}> 로 이동하세요.*`,
         });
 
         // 티켓 채널 임베드
