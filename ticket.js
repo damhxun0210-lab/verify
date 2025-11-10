@@ -106,7 +106,7 @@ export async function setupTicket(client) {
       ],
     },
     {
-      id: "1427689762902511616", // 추가된 역할 권한
+      id: "1437445346002473094", // 추가된 역할 권한
       allow: [
         PermissionsBitField.Flags.ViewChannel,
         PermissionsBitField.Flags.SendMessages,
